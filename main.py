@@ -274,7 +274,7 @@ except Exception as e:
 print("\n[+] Loading LLM...")
 try:
     llm = OllamaLLM(
-        model="gemma3:1b",
+        model="MedGemma-4B",
         temperature=0.7,
         ollama_url="http://127.0.0.1:11434"
     )
@@ -599,4 +599,5 @@ if __name__ == "__main__":
             pass
 
         executor.shutdown(wait=True)
+
         print("[✓] Done!")
