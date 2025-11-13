@@ -17,46 +17,53 @@ Sydney – Ultra Fast Version , Local multimodal voice AI for medical guidance. 
 ## **🧩 Multimodal & Offline Architecture**
 
 Sydney is designed as a **unified multimodal AI assistant**:
+                         +--------------------+
+                         |    User Input      |
+                         |   Text / Voice     |
+                         +---------+----------+
+                                   |
+                        [Whisper Speech-to-Text]
+                                   |
+                +------------------+-------------------+
+                |                                      |
+        +--------------+                     +----------------------+
+        | Memory       |                     |  RAG Pipelines       |
+        | Manager      |                     |  - Local medical     |
+        | - Tracks N   |                     |    docs              |
+        |   recent     |                     |  - Granite 47M R2    |
+        |   turns      |                     |    embeddings        |
+        | - Maintains  |                     |  - Combines for      |
+        |   context    |                     |    reasoning         |
+        +--------------+                     +----------------------+
+                |                                      |
+                +------------------+-------------------+
+                                   |
+                        [Critical Keywords Filter]
+                        - Checks for emergencies ("chest pain", etc.)
+                             /                \
+         (emergency detected)                  (no emergency)
+                |                                  |
+      +-------------------------+          +-----------------------+
+      | [Contact Emergency]     |          |      [LLM Processing] |
+      | - Alert output         |           |   - Concise, context-|
+      | - Bypasses LLM, TTS    |           |     aware reasoning  |
+      | - Notifies authorities |           |   - Multi-topic      |
+      +-------------------------+           |     reasoning        |
+                |                           +-----------------------+
+                |                                   |
+         +---------------------+            [Post-processing & Cleanup]
+         | Gradio UI / Output |            - Markdown removal
+         | - Text / Voice     |            - Bullet point formatting
+         +---------------------+                    |
+                                           [Glow-TTS Speech Synthesis]
+                                           - Natural, expressive audio
+                                                 |
+                                         +---------------------+
+                                         | Gradio UI / Output  |
+                                         |  Text + Voice       |
+                                         +---------------------+
 
-                +--------------------+
-                |   User Input       |
-                |  Text / Voice      |
-                +---------+----------+
-                          |
-                  [Whisper Speech-to-Text]
-                          |
-        +-----------------+-----------------+
-        |                                   |
-[Memory Manager]                     [RAG Pipelines]
-- Tracks last N turns               - Local medical docs
-- Maintains context                 - Granite 47M R2 embeddings
-- Preserves conversation            - Combines results for reasoning
-        |                                   |
-        +-----------------+-----------------+
-                          |
-                [Critical Keywords Filter]
-            - Checks input for emergencies
-            - "chest pain", etc.
-            /             \
-(emergency detected)   (no emergency)
-     |                     |
-[Contact Emergency]    [LLM Processing]
- (Output alert,         - Concise, context-aware
-  bypass LLM, TTS,     - Multi-topic reasoning
-  etc. — notify         |
-  authorities)       [Post-processing & Cleanup]
-                         - Markdown removal
-                         - Bullet point formatting
-                             |
-                       [Glow-TTS Speech Synthesis]
-                         - Natural, expressive audio
-                             |
-                        +---------------------+
-                        | Gradio UI / Output  |
-                        | Text + Voice        |
-                        +---------------------+
 
-Here’s your complete revised README, integrating:
 
 - **Critical Keywords/Emergency Filter**: Skips regular processing and contacts emergency services when critical medical terms (like “chest pain”) are detected.
 - **MedGemma-4B as default LLM**, with mention of other MedGemma models as possible options.
