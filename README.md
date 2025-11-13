@@ -17,51 +17,56 @@ Sydney – Ultra Fast Version , Local multimodal voice AI for medical guidance. 
 ## **🧩 Multimodal & Offline Architecture**
 
 Sydney is designed as a **unified multimodal AI assistant**:
-                         +--------------------+
-                         |    User Input      |
-                         |   Text / Voice     |
-                         +---------+----------+
-                                   |
-                        [Whisper Speech-to-Text]
-                                   |
-                +------------------+-------------------+
-                |                                      |
-        +--------------+                     +----------------------+
-        | Memory       |                     |  RAG Pipelines       |
-        | Manager      |                     |  - Local medical     |
-        | - Tracks N   |                     |    docs              |
-        |   recent     |                     |  - Granite 47M R2    |
-        |   turns      |                     |    embeddings        |
-        | - Maintains  |                     |  - Combines for      |
-        |   context    |                     |    reasoning         |
-        +--------------+                     +----------------------+
-                |                                      |
-                +------------------+-------------------+
-                                   |
-                        [Critical Keywords Filter]
-                        - Checks for emergencies ("chest pain", etc.)
-                             /                \
-         (emergency detected)                  (no emergency)
-                |                                  |
-      +-------------------------+          +-----------------------+
-      | [Contact Emergency]     |          |      [LLM Processing] |
-      | - Alert output         |           |   - Concise, context-|
-      | - Bypasses LLM, TTS    |           |     aware reasoning  |
-      | - Notifies authorities |           |   - Multi-topic      |
-      +-------------------------+           |     reasoning        |
-                |                           +-----------------------+
-                |                                   |
-         +---------------------+            [Post-processing & Cleanup]
-         | Gradio UI / Output |            - Markdown removal
-         | - Text / Voice     |            - Bullet point formatting
-         +---------------------+                    |
-                                           [Glow-TTS Speech Synthesis]
-                                           - Natural, expressive audio
-                                                 |
-                                         +---------------------+
-                                         | Gradio UI / Output  |
-                                         |  Text + Voice       |
-                                         +---------------------+
+
+
+  +---------------------------+
+|        User Input         |
+|      Text  /  Voice       |
++------------+--------------+
+             |
+ [Whisper Speech-to-Text]
+             |
++------------+--------------+
+| [Memory Manager]          |
+| - Tracks last N turns     |
+| - Maintains context       |
+| - Preserves conversation  |
++------------+--------------+
+             |
++------------+--------------+
+|        [RAG Pipeline]     |
+| - Local medical docs      |
+| - Granite 47M R2 embed.   |
+| - Combines results        |
++------------+--------------+
+             |
+   [Critical Keywords Filter]
+       - Checks for emergencies
+       - "chest pain", etc.
+         /             \
+(emergency)       (normal)
+     |                |
+[Contact Emergency]   |
+- Output alert        |
+- Bypass LLM,         | 
+  TTS, etc.           |
+- Notify authorities  |
+                      |
+           [LLM Processing]
+          - Concise, context-aware
+          - Multi-topic reasoning
+                      |
+        [Post-Processing & Cleanup]
+          - Markdown removal
+          - Bullet formatting
+                      |
+     [Glow-TTS Speech Synthesis]
+         - Natural, expressive
+                      |
+  +-----------------------------+
+  |      Gradio UI / Output     |
+  |        Text + Voice         |
+  +-----------------------------+
 
 
 
