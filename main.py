@@ -274,7 +274,7 @@ except Exception as e:
 print("\n[+] Loading LLM...")
 try:
     llm = OllamaLLM(
-        model="MedGemma-4B",
+        model="gemma3:1b",
         temperature=0.7,
         ollama_url="http://127.0.0.1:11434"
     )
@@ -431,64 +431,50 @@ def tts_to_file_fast(text: str) -> str:
         return None
 
 # ============ GRADIO HANDLERS ============
-def handle_text(user_text: str) -> Tuple[str, Optional[str]]:
-    """Handle text input - FAST"""
+def handle_text(user_text: str):
     if not user_text or not user_text.strip():
-        return "⚠️ Please type something.", None
-    
+        yield "⚠️ Please type something.", None
+        return
     try:
         answer = ask_llm(user_text)
         memory_manager.add(user_text, answer)
-        
-        # Start TTS in background (non-blocking)
+        yield answer, None
         audio_future = executor.submit(tts_to_file_fast, answer)
-        
         try:
-            audio_path = audio_future.result(timeout=30)  # Increased timeout to 30s
+            audio_path = audio_future.result()
         except Exception as e:
-            print(f"[!] TTS timeout: {e}")
+            print(f"[!] TTS error: {e}")
             audio_path = None
-        
-        return answer, audio_path
-        
+        yield answer, audio_path
     except Exception as e:
         print(f"[!] Error: {e}")
-        return f"⚠️ Error: {str(e)}", None
+        yield f"⚠️ Error: {str(e)}", None
 
-def handle_mic(audio_path: str) -> Tuple[str, Optional[str]]:
-    """Handle microphone - FAST"""
+def handle_mic(audio_path: str):
     if not audio_path:
-        return "⚠️ No audio.", None
-    
+        yield "⚠️ No audio.", None, None
+        return
     try:
+        yield "Transcribing...", audio_path, None
         result = transcribe_async(audio_path)
         if not result.strip():
-            return "⚠️ Couldn't understand.", None
-        
+            yield "⚠️ Couldn't understand.", audio_path, None
+            return
         answer = ask_llm(result)
         memory_manager.add(result, answer)
-        
+        yield answer, audio_path, None
+        audio_future = executor.submit(tts_to_file_fast, answer)
         try:
-            audio_out = tts_to_file_fast(answer)
-            # Ensure file is fully written before returning
+            audio_out = audio_future.result()
             if audio_out and os.path.exists(audio_out):
-                # Small delay to ensure file is completely written
                 time.sleep(0.1)
         except Exception as e:
             print(f"[!] TTS error: {e}")
             audio_out = None
-
-        if os.path.exists(audio_path):
-            try:
-                os.remove(audio_path)
-            except:
-                pass
-            
-        return answer, audio_out
-
+        yield answer, audio_path, audio_out
     except Exception as e:
         print(f"[!] Error: {e}")
-        return f"⚠️ Error: {str(e)}", None
+        yield f"⚠️ Error: {str(e)}", audio_path, None
 
 # ============ GRADIO UI ============
 if gr is None:
@@ -518,7 +504,7 @@ else:
                         placeholder="🧘‍♂️ Chill, AI is bigger than the Internet"
                     )
                 with gr.Column(scale=1):
-                    audio_out = gr.Audio(label="Audio", type="filepath")
+                    audio_out = gr.Audio(label="Audio", type="filepath", autoplay=True)
 
             send_btn.click(
                 fn=handle_text,
@@ -548,12 +534,13 @@ else:
                         placeholder="🧠 Relax — AI is thinking..."
                     )
                 with gr.Column(scale=1):
-                    audio_out2 = gr.Audio(label="Audio", type="filepath")
+                    mic_preview = gr.Audio(label="Recorded", type="filepath")
+                    audio_out2 = gr.Audio(label="Audio", type="filepath", autoplay=True)
 
             mic_btn.click(
                 fn=handle_mic,
                 inputs=mic_in,
-                outputs=[reply_box2, audio_out2],
+                outputs=[reply_box2, mic_preview, audio_out2],
                 show_progress="minimal"
             )
 
@@ -565,7 +552,7 @@ if __name__ == "__main__":
         if demo is not None:
             # attempt to enable queue when available
             try:
-                demo.queue()
+                demo.queue(concurrency_count=2, max_size=32)
             except Exception:
                 pass
 
@@ -599,5 +586,4 @@ if __name__ == "__main__":
             pass
 
         executor.shutdown(wait=True)
-
         print("[✓] Done!")
