@@ -306,8 +306,8 @@ Assistant:
 #### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/AvijitShil/Sydney.git
-cd Sydney
+git clone https://github.com/AvijitShil/Sydney_m2.git
+cd Sydney_m2
 ```
 
 #### 2. Setup Python Environment
