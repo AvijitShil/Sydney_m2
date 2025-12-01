@@ -1,6 +1,8 @@
 # Sydney_m2 Ultra Fast Version
 Sydney – Ultra Fast Version , Local multimodal voice AI for medical guidance. Offline, CPU‑friendly, powered by MedGemma-4B/Gemma3:1B, Whisper Tiny (Customizable); Glow‑TTS. RAG + memory = smart, fast insights. accurate, context-aware responses.
 
+Demo Video : https://www.linkedin.com/posts/avijit-shil-427125332_introducing-sydneym2-the-ultra-fast-activity-7395222937416429568-yuJu?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAAFOq8h8B-_Tw1qwZu38sKyDkMJPwR5kXX6Y
+
 ## **🚀 Key Highlights**
 
 * 🧠 **Multimodal**: Supports both **text** and **voice input/output** in the same version.
